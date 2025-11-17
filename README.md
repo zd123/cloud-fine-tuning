@@ -253,6 +253,12 @@ exit
 - **Solution**: Make sure you selected a GPU instance (not CPU)
 - Try: `nvidia-smi` to verify GPU is present
 
+### Training crashes with "Attempting to unscale FP16 gradients"
+- **Solution**: This was a known issue with FP16/BF16 configuration that has been fixed
+- The script now uses BFloat16 (`bf16`) instead of FP16 for better stability
+- See `DEBUG_FP16_ISSUE.md` for detailed explanation of the problem and solution
+- If you still encounter this, your GPU might not support BF16 - try disabling mixed precision
+
 ---
 
 ## 📁 Repository Structure
@@ -261,6 +267,7 @@ exit
 cloud-fine-tuning/
 ├── README.md                    # This file
 ├── simple_finetune.py          # Minimal fine-tuning script
+├── DEBUG_FP16_ISSUE.md         # Troubleshooting guide for gradient scaling error
 ├── .gitignore                  # Ignore venv, outputs, etc.
 └── training_data/              # Your .txt files go here
     └── sample.txt

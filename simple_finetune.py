@@ -71,9 +71,11 @@ if tokenizer.pad_token is None:
 print(f"✓ Tokenizer loaded (vocab size: {len(tokenizer)})")
 
 # Load model
+# Using bfloat16 for better numerical stability with modern GPUs
+# Note: Some GPUs (A10, A100, H100) support bf16, older ones will fall back to fp16
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_NAME,
-    torch_dtype=torch.float16,
+    dtype=torch.bfloat16 if torch.cuda.is_available() and torch.cuda.is_bf16_supported() else torch.float16,
     device_map="auto"
 )
 num_params = sum(p.numel() for p in model.parameters())
@@ -121,7 +123,10 @@ training_args = TrainingArguments(
     per_device_train_batch_size=2,
     gradient_accumulation_steps=4,
     learning_rate=2e-5,
-    fp16=torch.cuda.is_available(),
+    # Use bf16 instead of fp16 for better stability with device_map="auto"
+    # bf16 doesn't require gradient scaling and works better with mixed precision
+    bf16=torch.cuda.is_available() and torch.cuda.is_bf16_supported(),
+    fp16=False,  # Explicitly disable fp16 to avoid gradient scaling conflicts
     logging_steps=10,
     eval_strategy="steps",
     eval_steps=50,
@@ -151,13 +156,14 @@ data_collator = DataCollatorForLanguageModeling(
 )
 
 # Initialize the trainer - this handles all the training logic
+# Using processing_class instead of tokenizer (updated API)
 trainer = Trainer(
     model=model,
     args=training_args,
     train_dataset=train_dataset,
     eval_dataset=eval_dataset,
     data_collator=data_collator,
-    tokenizer=tokenizer,
+    processing_class=tokenizer,
 )
 
 # START TRAINING
