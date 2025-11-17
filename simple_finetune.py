@@ -20,7 +20,9 @@ import os
 # CONFIGURATION - Edit these values
 # ============================================================================
 
-MODEL_NAME = "Qwen/Qwen2.5-0.5B-Instruct"  # Small, fast model
+# MODEL_NAME = "Qwen/Qwen2.5-0.5B-Instruct"  # Small, fast model
+# model = "TinyLlama/TinyLlama_v1.1"
+MODEL_NAME = "TinyLlama/TinyLlama_v1.1"
 DATA_DIR = "./training_data"                # Folder with your .txt files
 OUTPUT_DIR = "./output"                     # Where to save the model
 MAX_LENGTH = 512                            # Sequence length
