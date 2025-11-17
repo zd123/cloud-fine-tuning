@@ -184,21 +184,72 @@ tokenizer.save_pretrained(OUTPUT_DIR + "/final_model")
 print(f"✓ Model saved to {OUTPUT_DIR}/final_model")
 
 # ============================================================================
-# STEP 7: Test generation
+# STEP 7: Compare original vs fine-tuned model
 # ============================================================================
 
 print("\n" + "=" * 60)
-print("Testing text generation...")
+print("STEP 7: Comparing models (before vs after fine-tuning)...")
 print("=" * 60)
 
-test_prompt = "Once upon a time"
-inputs = tokenizer(test_prompt, return_tensors="pt").to(model.device)
-outputs = model.generate(**inputs, max_length=100, temperature=0.7, do_sample=True)
-generated = tokenizer.decode(outputs[0], skip_special_tokens=True)
+# Load the original model for comparison
+print("\nLoading original model for comparison...")
+original_model = AutoModelForCausalLM.from_pretrained(
+    MODEL_NAME,
+    dtype=torch.bfloat16 if torch.cuda.is_available() and torch.cuda.is_bf16_supported() else torch.float16,
+    device_map="auto"
+)
+print("✓ Original model loaded\n")
 
-print(f"\nPrompt: '{test_prompt}'")
-print(f"Output:\n{generated}\n")
+# Test prompts - you can customize these
+test_prompts = [
+    "Once upon a time",
+    "The meaning of life is",
+    "In my opinion,",
+]
+
+# Generate from both models for comparison
+for i, prompt in enumerate(test_prompts, 1):
+    print(f"\n{'='*60}")
+    print(f"TEST {i}: '{prompt}'")
+    print(f"{'='*60}\n")
+    
+    # Tokenize the prompt
+    inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+    
+    # Generate with ORIGINAL model
+    print("🔵 ORIGINAL MODEL OUTPUT:")
+    print("-" * 60)
+    with torch.no_grad():
+        original_outputs = original_model.generate(
+            **inputs, 
+            max_length=100,           # Maximum length of generation
+            temperature=0.7,          # Controls randomness (0.0 = deterministic, 1.0 = very random)
+            do_sample=True,           # Enable sampling (more creative)
+            top_p=0.9,                # Nucleus sampling (consider top 90% probability mass)
+            repetition_penalty=1.1    # Penalize repetition
+        )
+    original_text = tokenizer.decode(original_outputs[0], skip_special_tokens=True)
+    print(original_text)
+    
+    # Generate with FINE-TUNED model
+    print("\n🟢 FINE-TUNED MODEL OUTPUT:")
+    print("-" * 60)
+    with torch.no_grad():
+        finetuned_outputs = model.generate(
+            **inputs,
+            max_length=100,
+            temperature=0.7,
+            do_sample=True,
+            top_p=0.9,
+            repetition_penalty=1.1
+        )
+    finetuned_text = tokenizer.decode(finetuned_outputs[0], skip_special_tokens=True)
+    print(finetuned_text)
+    print()
+
 print("=" * 60)
-print("✓ All done! Your model is ready.")
+print("✓ TRAINING COMPLETE! Your fine-tuned model is ready.")
+print(f"✓ Model saved to: {OUTPUT_DIR}/final_model")
 print("=" * 60)
+print("\n💡 TIP: Use test_model.py to test with custom prompts!")
 

@@ -229,6 +229,79 @@ exit
 
 ---
 
+## 🧪 Testing Your Fine-Tuned Model
+
+After training completes, `simple_finetune.py` automatically compares the original model vs your fine-tuned model with test prompts. But you can also test interactively!
+
+### Option 1: Interactive Testing (Recommended)
+
+Run the test script and enter prompts one at a time:
+
+```bash
+# SSH into Lambda (if not already connected)
+ssh ubuntu@<LAMBDA-IP>
+
+# Navigate and activate environment
+cd cloud-fine-tuning
+source venv/bin/activate
+
+# Run interactive testing
+python test_model.py
+```
+
+**Interactive mode features:**
+- Enter any prompt and see the model's response
+- Test multiple prompts in one session
+- Type `settings` to see generation parameters
+- Type `quit` to exit
+
+**Example session:**
+```
+💬 Enter prompt (or 'quit' to exit): Once upon a time in Brooklyn,
+
+🤖 Generated Text:
+Once upon a time in Brooklyn, there was a girl named Cardi...
+```
+
+### Option 2: Single Prompt from Command Line
+
+Test with one prompt directly:
+
+```bash
+# Quick one-off test
+python test_model.py "Your prompt goes here"
+
+# Example
+python test_model.py "In my opinion, the best thing about"
+```
+
+### Option 3: Customize Generation Settings
+
+Edit the settings at the top of `test_model.py`:
+
+```python
+MAX_LENGTH = 150              # How long to generate
+TEMPERATURE = 0.7             # 0.0 = safe, 1.0 = creative
+TOP_P = 0.9                   # Nucleus sampling
+REPETITION_PENALTY = 1.1      # Avoid repetition
+```
+
+### Downloading Your Model Locally
+
+Want to test on your local machine? Download the model:
+
+```bash
+# From your LOCAL machine terminal:
+scp -r ubuntu@<LAMBDA-IP>:~/cloud-fine-tuning/output/final_model ./my_model
+
+# Then test locally:
+python test_model.py "test prompt"
+```
+
+*(Make sure to update `MODEL_PATH` in `test_model.py` to point to your local model)*
+
+---
+
 ## 🐛 Troubleshooting Connection Issues
 
 ### "Connection refused"
@@ -266,8 +339,10 @@ exit
 ```
 cloud-fine-tuning/
 ├── README.md                    # This file
-├── simple_finetune.py          # Minimal fine-tuning script
+├── simple_finetune.py          # Minimal fine-tuning script (includes before/after comparison)
+├── test_model.py               # Interactive testing script for your fine-tuned model
 ├── DEBUG_FP16_ISSUE.md         # Troubleshooting guide for gradient scaling error
+├── UPLOAD_FIXES.md             # Guide for uploading fixed scripts to Lambda
 ├── .gitignore                  # Ignore venv, outputs, etc.
 └── training_data/              # Your .txt files go here
     └── sample.txt
@@ -281,9 +356,10 @@ cloud-fine-tuning/
 2. **SSH** into the instance
 3. **Clone** this repo and set up virtual environment
 4. **Upload** training data via `scp`
-5. **Run** `simple_finetune.py` or Jupyter notebook
-6. **Download** trained model
-7. **Terminate** instance to stop charges
+5. **Run** `simple_finetune.py` (automatically compares original vs fine-tuned)
+6. **Test** your model with `test_model.py` (interactive or command-line)
+7. **Download** trained model (optional - if you want to use it locally)
+8. **Terminate** instance to stop charges
 
 ---
 

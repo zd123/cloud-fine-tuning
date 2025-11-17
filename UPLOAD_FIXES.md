@@ -7,7 +7,7 @@ The fixes were applied to your LOCAL copy, but haven't been transferred to the c
 
 ## Solution: Upload the Fixed Script
 
-### Option 1: Use SCP to Upload the Fixed File (Fastest)
+### Option 1: Use SCP to Upload the Fixed Files (Fastest)
 
 From your **local terminal** (not SSH'd into Lambda):
 
@@ -15,11 +15,11 @@ From your **local terminal** (not SSH'd into Lambda):
 # Navigate to the cloud-fine-tuning directory
 cd ~/fine-turning-lecture-2025/cloud-fine-tuning
 
-# Upload the fixed script to Lambda
-scp simple_finetune.py ubuntu@<YOUR-LAMBDA-IP>:~/cloud-fine-tuning/
+# Upload the fixed scripts to Lambda
+scp simple_finetune.py test_model.py ubuntu@<YOUR-LAMBDA-IP>:~/cloud-fine-tuning/
 
 # Example:
-# scp simple_finetune.py ubuntu@150.136.14.72:~/cloud-fine-tuning/
+# scp simple_finetune.py test_model.py ubuntu@150.136.14.72:~/cloud-fine-tuning/
 ```
 
 ### Option 2: Pull Latest Changes from Git
@@ -105,12 +105,17 @@ python simple_finetune.py
 ```bash
 # From your LOCAL machine:
 cd ~/fine-turning-lecture-2025/cloud-fine-tuning
-scp simple_finetune.py ubuntu@<LAMBDA-IP>:~/cloud-fine-tuning/
+scp simple_finetune.py test_model.py ubuntu@<LAMBDA-IP>:~/cloud-fine-tuning/
 
 # Then SSH into Lambda and run:
 ssh ubuntu@<LAMBDA-IP>
 cd ~/cloud-fine-tuning
 source venv/bin/activate
+
+# Run training (includes automatic before/after comparison)
 python simple_finetune.py
+
+# After training, test interactively with custom prompts
+python test_model.py
 ```
 
